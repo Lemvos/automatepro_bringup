@@ -1,0 +1,8 @@
+ntrip_client:
+  ros__parameters:
+    use_https: false
+    host: rtk2go.com
+    port: 2101
+    mountpoint: Prittlbach
+    username: "noname"
+    password: "password"

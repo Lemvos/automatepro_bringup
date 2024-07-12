@@ -1,0 +1,23 @@
+# Configuration Settings for F9P device in Moving Base Mode
+gnss_base_node:
+  ros__parameters:
+    debug: 0                    # Range 0-4 (0 means no debug statements will print)
+
+    device: /dev/ttyACM0
+    frame_id: gnss_base
+
+    config_on_startup: false    # If false, the node will not override configurations of the device on startup
+                                # Device should be configured with u-center and configurations should be saved in flash
+                                # Please use the configuration file provided by Lemvos
+
+    # Enable u-blox gnss message publishers
+    publish:
+      all: false
+      aid:
+        hui: false
+      nav:
+        all: false
+        posllh: false
+        posecef: false
+        relposned: false
+      nmea: false
