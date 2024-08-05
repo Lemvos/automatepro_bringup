@@ -1,5 +1,5 @@
 # Configuration Settings for F9P device in Moving Base Mode
-gnss_base_node:
+automatepro_gnss_base_node:
   ros__parameters:
     debug: 0                    # Range 0-4 (0 means no debug statements will print)
 
@@ -21,3 +21,5 @@ gnss_base_node:
         posecef: false
         relposned: false
       nmea: false
+      mon:
+        all: true

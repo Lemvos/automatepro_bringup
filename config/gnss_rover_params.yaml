@@ -1,5 +1,5 @@
 # Configuration Settings for F9H device in Rover Mode
-gnss_rover_node:
+automatepro_gnss_rover_node:
   ros__parameters:
     debug: 0                    # Range 0-4 (0 means no debug statements will print)
 
@@ -17,5 +17,7 @@ gnss_rover_node:
         hui: false
       nav:
         relposned: true
+        heading: true
       nmea: false
-
+      mon:
+        all: true
