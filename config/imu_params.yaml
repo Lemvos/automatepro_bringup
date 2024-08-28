@@ -1,4 +1,4 @@
-imu_driver:
+automatepro_imu_driver:
   ros__parameters:
     i2c_address: 0x4b # 0x4a or 0x4b
     enable_imu: true
