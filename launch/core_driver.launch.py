@@ -56,6 +56,7 @@ def generate_f9p_base_node():
             ('automatepro_gnss_base_node/fix', '/sensor/gnss/position/fix'),
             ('automatepro_gnss_base_node/fix_velocity', '/sensor/gnss/position/fix_velocity'),
             ('monhw', '/sensor/gnss/position/monhw'),
+            ('monsys', '/sensor/gnss/position/monsys'),
             ('rtcm', '/sensor/gnss/correction/rtcm')
         ]
     )
@@ -73,8 +74,9 @@ def generate_f9h_rover_node():
             ('automatepro_gnss_rover_node/fix', '/sensor/gnss/heading/fix'),
             ('automatepro_gnss_rover_node/fix_velocity', '/sensor/gnss/heading/fix_velocity'),
             ('monhw', '/sensor/gnss/heading/monhw'),
+            ('monsys', '/sensor/gnss/heading/monsys'),
             ('navrelposned', '/sensor/gnss/heading/navrelposned'),
-            ('navheading', '/sensor/gnss/heading/true_heading')
+            ('navheading', '/sensor/gnss/heading/true_heading'),
         ]
     )
     return node
