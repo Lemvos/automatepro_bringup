@@ -126,7 +126,7 @@ def generate_camera_node():
     return nodes
 
 def generate_ntrip_client_node():
-    params = get_config_path('ntrip_client', 'ntrip_params.yaml')
+    params = get_config_path('automatepro_ntrip_client', 'ntrip_params.yaml')
     container = ComposableNodeContainer(
         name='ntrip_client_container',
         namespace='',
@@ -136,7 +136,7 @@ def generate_ntrip_client_node():
             ComposableNode(
                 package='ntrip_client',
                 plugin='ntrip_client::NTRIPClientNode',
-                name='ntrip_client',
+                name='automatepro_ntrip_client',
                 parameters=[params],
                 remappings=[
                     ('rtcm', '/sensor/gnss/correction/rtcm'),

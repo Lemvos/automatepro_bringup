@@ -1,4 +1,4 @@
-ntrip_client:
+automatepro_ntrip_client:
   ros__parameters:
     use_https: false
     host: rtk2go.com
