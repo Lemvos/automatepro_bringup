@@ -1,4 +1,95 @@
-camera_node:
+automatepro_cam1_node:
   ros__parameters:
-    camera_name: "camera"
+    camera_name: "cam1"
     camera_info_url: ""
+    resolution: [640, 512]
+    format: "bgr8"
+    frame_id: "cam1"
+
+    compression:
+      enable: false
+      format: "h264"
+      bitrate: 5000    # kbps
+
+    qos_overrides:
+      /camera/1/camera_info:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+      /camera/1/image_raw:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+      /camera/1/h264/video:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+      /camera/1/h264/calib:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+    # Do not change the following parameters
+    sensor:
+      device: "/dev/video0"
+      model: "SG3S-ISX031C"
+      resolution: [1920, 1536]
+      frame_rate: 30
+      format: "UYVY"
+      calib:
+        distortion_model: []
+        d: []
+        k: []
+        r: []
+        p: []
+
+automatepro_cam2_node:
+  ros__parameters:
+    camera_name: "cam2"
+    camera_info_url: ""
+    resolution: [640, 512]
+    format: "bgr8"
+    frame_id: "cam2"
+
+    compression:
+      enable: false
+      format: "h264"
+      bitrate: 5000    # kbps
+
+    qos_overrides:
+      /camera/2/camera_info:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+      /camera/2/image_raw:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+      /camera/2/h264/video:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+      /camera/2/h264/calib:
+        reliability: best_effort
+        durability: volatile
+        depth: 3
+
+    # Do not change the following parameters
+    sensor:
+      device: "/dev/video1"
+      model: "SG3S-ISX031C"
+      resolution: [1920, 1536]
+      frame_rate: 30
+      format: "UYVY"
+      calib:
+        distortion_model: []
+        d: []
+        k: []
+        r: []
+        p: []

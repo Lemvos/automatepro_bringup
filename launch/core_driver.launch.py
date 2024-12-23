@@ -95,23 +95,35 @@ def generate_imu_driver_node():
 
 def generate_camera_node():
     params = get_config_path('automatepro_camera_driver', 'camera_params.yaml')
-    node = Node(
-        package='v4l2_camera',
-        executable='v4l2_camera_node',
+    nodes = []
+    nodes.append( Node(
+        package='automatepro_camera_driver',
+        executable='camera_node',
         output='screen',
-        name='camera_node',
-        parameters=[
-            params,
-            {   
-                'video_device': '/dev/video0',
-                'ffmpeg_image_transport.profile': 'main',
-                'ffmpeg_image_transport.preset': 'ultrafast',
-                'ffmpeg_image_transport.gop': 15,
-            },
-        ],
-    )
+        name='automatepro_cam1_node',
+        parameters=[params],
+        remappings=[
+            ('/camera/image_raw', '/camera/1/image_raw'),
+            ('/camera/camera_info', '/camera/1/camera_info'),
+            ('/camera/h264/video', '/camera/1/h264/video'),
+            ('/camera/h264/calib', '/camera/1/h264/calib'),
+        ]
+    ))
+    nodes.append( Node( 
+        package='automatepro_camera_driver',
+        executable='camera_node',
+        output='screen',
+        name='automatepro_cam2_node',
+        parameters=[params],
+        remappings=[
+            ('/camera/image_raw', '/camera/2/image_raw'),
+            ('/camera/camera_info', '/camera/2/camera_info'),
+            ('/camera/h264/video', '/camera/2/h264/video'),
+            ('/camera/h264/calib', '/camera/2/h264/calib'),
+        ]
+    ))
 
-    return node
+    return nodes
 
 def generate_ntrip_client_node():
     params = get_config_path('ntrip_client', 'ntrip_params.yaml')
