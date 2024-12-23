@@ -85,8 +85,8 @@ def generate_imu_driver_node():
     params = get_config_path('automatepro_imu_driver', 'imu_params.yaml')
     node = Node(
         package='automatepro_imu_driver',  
-        executable='imu_driver',  
-        name='imu_driver',
+        executable='bno08x_driver',  
+        name='automatepro_imu_driver',
         output='screen',
         parameters=[params]
     )

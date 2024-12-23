@@ -1,7 +1,16 @@
 automatepro_imu_driver:
   ros__parameters:
-    i2c_address: 0x4b # 0x4a or 0x4b
-    enable_imu: true
-    enable_magnetometer: false
-    imu_rate: 100
-    magnetometer_rate: 100
+
+    frame_id: "imu"
+    i2c:
+      enabled: true
+      bus: "/dev/i2c-7"
+      address: "0x4B"
+
+    publish:
+      magnetic_field: 
+        enabled: true
+        rate: 100   # max 100 Hz
+      imu:
+        enabled: true
+        rate: 100   # max 400 Hz 
