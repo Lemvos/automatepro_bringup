@@ -1,6 +1,7 @@
 import os
 import ament_index_python.packages
 import launch
+import yaml
 import launch_ros.actions
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
@@ -18,7 +19,11 @@ enable_imu = DeclareLaunchArgument(
 )
 
 enable_camera = DeclareLaunchArgument(
-    "enable_camera", default_value=TextSubstitution(text="true")
+    "enable_cam1", default_value=TextSubstitution(text="true")
+)
+
+enable_camera = DeclareLaunchArgument(
+    "enable_cam2", default_value=TextSubstitution(text="true")
 )
 
 enable_ntrip_client = DeclareLaunchArgument(
@@ -93,37 +98,51 @@ def generate_imu_driver_node():
 
     return node
 
-def generate_camera_node():
+def generate_cam1_node():
     params = get_config_path('automatepro_camera_driver', 'camera_params.yaml')
-    nodes = []
-    nodes.append( Node(
+    with open(params, 'r') as file:
+        data = yaml.safe_load(file)
+        camera_name = data.get(
+            'automatepro_cam1_node', {}).get(
+            'ros__parameters', {}).get('camera_name', 'cam1')
+    node = Node(
         package='automatepro_camera_driver',
-        executable='camera_node',
-        output='screen',
+        executable='camera_driver',
+        output='both',
         name='automatepro_cam1_node',
         parameters=[params],
         remappings=[
-            ('/camera/image_raw', '/camera/1/image_raw'),
-            ('/camera/camera_info', '/camera/1/camera_info'),
-            ('/camera/h264/video', '/camera/1/h264/video'),
-            ('/camera/h264/calib', '/camera/1/h264/calib'),
+            ('/camera/image_raw', f'/camera/{camera_name}/image_raw'),
+            ('/camera/camera_info', f'/camera/{camera_name}/camera_info'),
+            ('/camera/h264/video', f'/camera/{camera_name}/h264/video'),
+            ('/camera/h264/calib', f'/camera/{camera_name}/h264/calib'),
         ]
-    ))
-    nodes.append( Node( 
+    )
+
+    return node
+
+def generate_cam2_node():
+    params = get_config_path('automatepro_camera_driver', 'camera_params.yaml')
+    with open(params, 'r') as file:
+        data = yaml.safe_load(file)
+        camera_name = data.get(
+            'automatepro_cam2_node', {}).get(
+            'ros__parameters', {}).get('camera_name', 'cam2')
+    node = Node( 
         package='automatepro_camera_driver',
-        executable='camera_node',
-        output='screen',
+        executable='camera_driver',
+        output='both',
         name='automatepro_cam2_node',
         parameters=[params],
         remappings=[
-            ('/camera/image_raw', '/camera/2/image_raw'),
-            ('/camera/camera_info', '/camera/2/camera_info'),
-            ('/camera/h264/video', '/camera/2/h264/video'),
-            ('/camera/h264/calib', '/camera/2/h264/calib'),
+            ('/camera/image_raw', f'/camera/{camera_name}/image_raw'),
+            ('/camera/camera_info', f'/camera/{camera_name}/camera_info'),
+            ('/camera/h264/video', f'/camera/{camera_name}/h264/video'),
+            ('/camera/h264/calib', f'/camera/{camera_name}/h264/calib'),
         ]
-    ))
+    )
 
-    return nodes
+    return node
 
 def generate_ntrip_client_node():
     params = get_config_path('automatepro_ntrip_client', 'ntrip_params.yaml')
@@ -152,12 +171,14 @@ def configure_nodes(context, *args, **kwargs):
 
     enable_gnss_value = LaunchConfiguration('enable_gnss').perform(context)
     enable_imu_value = LaunchConfiguration('enable_imu').perform(context)
-    enable_camera_value = LaunchConfiguration('enable_camera').perform(context)
+    enable_cam1_value = LaunchConfiguration('enable_cam1').perform(context)
+    enable_cam2_value = LaunchConfiguration('enable_cam2').perform(context)
     enable_ntrip_client_value = LaunchConfiguration('enable_ntrip_client').perform(context)
 
     print("enable_gnss: ", enable_gnss_value)
     print("enable_imu: ", enable_imu_value)
-    print("enable_camera: ", enable_camera_value)
+    print("enable_cam1: ", enable_cam1_value)
+    print("enable_cam2: ", enable_cam2_value)
     print("enable_ntrip_client: ", enable_ntrip_client_value)
 
     if enable_gnss_value == "true":
@@ -165,8 +186,10 @@ def configure_nodes(context, *args, **kwargs):
         nodes.append(generate_f9p_base_node())
     if enable_imu_value == "true":
         nodes.append(generate_imu_driver_node())
-    if enable_camera_value == "true":
-        nodes.append(generate_camera_node())
+    if enable_cam1_value == "true":
+        nodes.append(generate_cam1_node())
+    if enable_cam2_value == "true":
+        nodes.append(generate_cam2_node())
     if enable_ntrip_client_value == "true":
         nodes.extend(generate_ntrip_client_node())
 
@@ -192,4 +215,5 @@ def generate_launch_description():
             )
         ),
     ])
+
 
