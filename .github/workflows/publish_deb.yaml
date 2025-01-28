@@ -1,0 +1,59 @@
+name: Build and Push Debian Package for ARM64
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up ROS 2 environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository universe
+          sudo apt-get update
+          sudo apt-get install -y python3-rosdep python3-bloom python3-colcon-common-extensions qemu-user-static binfmt-support
+
+      - name: Initialize rosdep
+        run: |
+          sudo rosdep init || echo "rosdep already initialized"
+          rosdep update
+
+      - name: Create Docker container for ARM64
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker buildx create --use
+
+      - name: Build DEB package
+        run: |
+          mkdir -p ros2_ws/src
+          mv * ros2_ws/src
+          cd ros2_ws
+          rosdep install --from-paths src --ignore-src -r -y --os=ubuntu:jammy
+          colcon build --build-base build --install-base install
+          bloom-generate rosdebian --ros-distro humble
+          fakeroot debian/rules binary
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ros2-deb-package
+          path: ros2_ws/*.deb
+
+      - name: Publish DEB package to Buildkite
+        env:
+          TOKEN: ${{ secrets.BUILDKITE_TOKEN }}
+        run: |
+          FILE=$(find ros2_ws -name "*.deb")
+          curl -X POST https://api.buildkite.com/v2/packages/organizations/lemvos-gmbh/registries/automatepro/packages \
+               -H "Authorization: Bearer $TOKEN" \
+               -F "file=@$FILE"
