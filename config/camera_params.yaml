@@ -10,6 +10,8 @@ automatepro_cam1_node:
       enable: true
       format: "h264"
       bitrate: 5000    # kbps
+    rtp:
+      enable: false
 
     # Do not change the following parameters
     sensor:
@@ -31,6 +33,8 @@ automatepro_cam2_node:
       enable: true
       format: "h264"
       bitrate: 5000    # kbps
+    rtp:
+      enable: false
 
     # Do not change the following parameters
     sensor:
