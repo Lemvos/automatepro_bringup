@@ -2,16 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>automatepro_bringup</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>Bringup package for AutomatePro</description>
   <maintainer email="balachandra.bhat@lemvos.com">Balachandra</maintainer>
   <license>Apache-2.0</license>
 
   <depend>ament_cmake</depend>
-  <depend>automatepro_interfaces</depend>
-  <depend>ublox_gps</depend>
-  <depend>automatepro_imu_driver</depend>
-  <depend>automatepro_camera_driver</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
