@@ -1,0 +1,5 @@
+.obj*/
+debian/
+.pybuild/
+.pytest_cache/
+*.egg-info/
