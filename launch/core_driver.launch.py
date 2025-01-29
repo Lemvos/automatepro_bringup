@@ -30,12 +30,23 @@ enable_ntrip_client = DeclareLaunchArgument(
     "enable_ntrip_client", default_value=TextSubstitution(text="true")
 )
 
+config_dir = DeclareLaunchArgument(
+    "config_dir", default_value=TextSubstitution(text="")
+)
+
 
 """
 If the config file exists in the config dir of the bringup package, load that.
 else load the config file located in each package.
 """
-def get_config_path(pkg_name, config_file):
+def get_config_path(config_dir_path, pkg_name, config_file):
+
+    bringup_config = os.path.join(config_dir_path, config_file)
+    
+    if os.path.exists(bringup_config):
+        print(f'Param File: {os.path.join(bringup_config, config_file)}')
+        return bringup_config
+
     bringup_config_directory = os.path.join(
         ament_index_python.packages.get_package_share_directory('automatepro_bringup'),
         'config')
@@ -49,8 +60,8 @@ def get_config_path(pkg_name, config_file):
             'config')
         return os.path.join(package_config_directory, config_file)
 
-def generate_f9p_base_node():
-    params = get_config_path('ublox_gps', 'gnss_base_params.yaml')
+def generate_f9p_base_node(config_dir_path):
+    params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_base_params.yaml')
     node = launch_ros.actions.Node(
         name='automatepro_gnss_base_node',
         package='ublox_gps',
@@ -67,8 +78,8 @@ def generate_f9p_base_node():
     )
     return node
 
-def generate_f9h_rover_node():
-    params = get_config_path('ublox_gps', 'gnss_rover_params.yaml')
+def generate_f9h_rover_node(config_dir_path):
+    params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_rover_params.yaml')
     node = launch_ros.actions.Node(
         name='automatepro_gnss_rover_node',
         package='ublox_gps',
@@ -86,8 +97,8 @@ def generate_f9h_rover_node():
     )
     return node
 
-def generate_imu_driver_node():
-    params = get_config_path('automatepro_imu_driver', 'imu_params.yaml')
+def generate_imu_driver_node(config_dir_path):
+    params = get_config_path(config_dir_path, 'automatepro_imu_driver', 'imu_params.yaml')
     node = Node(
         package='automatepro_imu_driver',  
         executable='bno08x_driver',  
@@ -98,8 +109,8 @@ def generate_imu_driver_node():
 
     return node
 
-def generate_cam1_node():
-    params = get_config_path('automatepro_camera_driver', 'camera_params.yaml')
+def generate_cam1_node(config_dir_path):
+    params = get_config_path(config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml')
     with open(params, 'r') as file:
         data = yaml.safe_load(file)
         camera_name = data.get(
@@ -121,8 +132,8 @@ def generate_cam1_node():
 
     return node
 
-def generate_cam2_node():
-    params = get_config_path('automatepro_camera_driver', 'camera_params.yaml')
+def generate_cam2_node(config_dir_path):
+    params = get_config_path(config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml')
     with open(params, 'r') as file:
         data = yaml.safe_load(file)
         camera_name = data.get(
@@ -144,8 +155,8 @@ def generate_cam2_node():
 
     return node
 
-def generate_ntrip_client_node():
-    params = get_config_path('automatepro_ntrip_client', 'ntrip_params.yaml')
+def generate_ntrip_client_node(config_dir_path):
+    params = get_config_path(config_dir_path ,'automatepro_ntrip_client', 'ntrip_params.yaml')
     container = ComposableNodeContainer(
         name='ntrip_client_container',
         namespace='',
@@ -174,6 +185,7 @@ def configure_nodes(context, *args, **kwargs):
     enable_cam1_value = LaunchConfiguration('enable_cam1').perform(context)
     enable_cam2_value = LaunchConfiguration('enable_cam2').perform(context)
     enable_ntrip_client_value = LaunchConfiguration('enable_ntrip_client').perform(context)
+    config_dir_value = LaunchConfiguration('config_dir').perform(context)
 
     print("enable_gnss: ", enable_gnss_value)
     print("enable_imu: ", enable_imu_value)
@@ -182,16 +194,16 @@ def configure_nodes(context, *args, **kwargs):
     print("enable_ntrip_client: ", enable_ntrip_client_value)
 
     if enable_gnss_value == "true":
-        nodes.append(generate_f9h_rover_node())
-        nodes.append(generate_f9p_base_node())
+        nodes.append(generate_f9h_rover_node(config_dir_value))
+        nodes.append(generate_f9p_base_node(config_dir_value))
     if enable_imu_value == "true":
-        nodes.append(generate_imu_driver_node())
+        nodes.append(generate_imu_driver_node(config_dir_value))
     if enable_cam1_value == "true":
-        nodes.append(generate_cam1_node())
+        nodes.append(generate_cam1_node(config_dir_value))
     if enable_cam2_value == "true":
-        nodes.append(generate_cam2_node())
+        nodes.append(generate_cam2_node(config_dir_value))
     if enable_ntrip_client_value == "true":
-        nodes.extend(generate_ntrip_client_node())
+        nodes.extend(generate_ntrip_client_node(config_dir_value))
 
     return nodes
 
@@ -201,19 +213,8 @@ def generate_launch_description():
         enable_imu,
         enable_camera,
         enable_ntrip_client,
+        config_dir,
         OpaqueFunction(function=configure_nodes),
-        launch.actions.RegisterEventHandler(
-            event_handler=launch.event_handlers.OnProcessExit(
-                target_action=generate_f9p_base_node(),
-                on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
-            )
-        ),
-        launch.actions.RegisterEventHandler(
-            event_handler=launch.event_handlers.OnProcessExit(
-                target_action=generate_f9h_rover_node(),
-                on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
-            )
-        ),
     ])
 
 
