@@ -71,9 +71,11 @@ def generate_f9p_base_node(config_dir_path):
         remappings=[
             ('automatepro_gnss_base_node/fix', '/sensor/gnss/position/fix'),
             ('automatepro_gnss_base_node/fix_velocity', '/sensor/gnss/position/fix_velocity'),
+            ('automatepro_gnss_base_node/navpvt', '/sensor/gnss/position/navpvt'),
             ('monhw', '/sensor/gnss/position/monhw'),
             ('monsys', '/sensor/gnss/position/monsys'),
-            ('rtcm', '/sensor/gnss/correction/rtcm')
+            ('nmea', '/sensor/gnss/position/nmea'),
+            ('rtcm', '/sensor/gnss/correction'),
         ]
     )
     return node
@@ -89,6 +91,7 @@ def generate_f9h_rover_node(config_dir_path):
         remappings=[
             ('automatepro_gnss_rover_node/fix', '/sensor/gnss/heading/fix'),
             ('automatepro_gnss_rover_node/fix_velocity', '/sensor/gnss/heading/fix_velocity'),
+            ('automatepro_gnss_rover_node/navpvt', '/sensor/gnss/heading/navpvt'),
             ('monhw', '/sensor/gnss/heading/monhw'),
             ('monsys', '/sensor/gnss/heading/monsys'),
             ('navrelposned', '/sensor/gnss/heading/navrelposned'),
@@ -156,26 +159,20 @@ def generate_cam2_node(config_dir_path):
     return node
 
 def generate_ntrip_client_node(config_dir_path):
-    params = get_config_path(config_dir_path ,'automatepro_ntrip_client', 'ntrip_params.yaml')
-    container = ComposableNodeContainer(
-        name='ntrip_client_container',
-        namespace='',
-        package='rclcpp_components',
-        executable='component_container_mt',
-        composable_node_descriptions=[
-            ComposableNode(
-                package='ntrip_client',
-                plugin='ntrip_client::NTRIPClientNode',
-                name='automatepro_ntrip_client',
-                parameters=[params],
-                remappings=[
-                    ('rtcm', '/sensor/gnss/correction/rtcm'),
-                ],
-            )
-        ]
-    )
+    params = get_config_path(config_dir_path ,'automatepro_spartn_client', 'spartn_params.yaml')
+    node = Node(
+        package='spartn_ros2_client',
+        executable='spartn_client',
+        name='automatepro_spartn_client',
+        output='screen',
+            parameters=[params],
+            remappings=[
+                ('spartn', '/sensor/gnss/correction'),
+                ('nmea', '/sensor/gnss/position/nmea'),
+            ],
+        )
 
-    return [ container]
+    return node
 
 def configure_nodes(context, *args, **kwargs):
     nodes = []
@@ -203,7 +200,7 @@ def configure_nodes(context, *args, **kwargs):
     if enable_cam2_value == "true":
         nodes.append(generate_cam2_node(config_dir_value))
     if enable_ntrip_client_value == "true":
-        nodes.extend(generate_ntrip_client_node(config_dir_value))
+        nodes.append(generate_ntrip_client_node(config_dir_value))
 
     return nodes
 

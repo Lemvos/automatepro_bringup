@@ -1,0 +1,9 @@
+automatepro_spartn_client:
+  ros__parameters:
+    host: "ppntrip.services.u-blox.com"
+    port: 2101
+    username: "your_username"
+    password: "your_password"
+    tls: false
+    mountpoint: "EU"
+    gga_interval: 60  # seconds
