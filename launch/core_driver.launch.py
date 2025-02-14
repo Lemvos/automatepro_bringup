@@ -63,15 +63,15 @@ def get_config_path(config_dir_path, pkg_name, config_file):
 def generate_f9p_base_node(config_dir_path):
     params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_base_params.yaml')
     node = launch_ros.actions.Node(
-        name='automatepro_gnss_base_node',
+        name='automatepro_gnss_position_node',
         package='ublox_gps',
         executable='ublox_gps_node',
         output='both',
         parameters=[params],
         remappings=[
-            ('automatepro_gnss_base_node/fix', '/sensor/gnss/position/fix'),
-            ('automatepro_gnss_base_node/fix_velocity', '/sensor/gnss/position/fix_velocity'),
-            ('automatepro_gnss_base_node/navpvt', '/sensor/gnss/position/navpvt'),
+            ('automatepro_gnss_position_node/fix', '/sensor/gnss/position/fix'),
+            ('automatepro_gnss_position_node/fix_velocity', '/sensor/gnss/position/fix_velocity'),
+            ('automatepro_gnss_position_node/navpvt', '/sensor/gnss/position/navpvt'),
             ('monhw', '/sensor/gnss/position/monhw'),
             ('monsys', '/sensor/gnss/position/monsys'),
             ('nmea', '/sensor/gnss/position/nmea'),
@@ -83,15 +83,15 @@ def generate_f9p_base_node(config_dir_path):
 def generate_f9h_rover_node(config_dir_path):
     params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_rover_params.yaml')
     node = launch_ros.actions.Node(
-        name='automatepro_gnss_rover_node',
+        name='automatepro_gnss_heading_node',
         package='ublox_gps',
         executable='ublox_gps_node',
         output='both',
         parameters=[params],
         remappings=[
-            ('automatepro_gnss_rover_node/fix', '/sensor/gnss/heading/fix'),
-            ('automatepro_gnss_rover_node/fix_velocity', '/sensor/gnss/heading/fix_velocity'),
-            ('automatepro_gnss_rover_node/navpvt', '/sensor/gnss/heading/navpvt'),
+            ('automatepro_gnss_heading_node/fix', '/sensor/gnss/heading/fix'),
+            ('automatepro_gnss_heading_node/fix_velocity', '/sensor/gnss/heading/fix_velocity'),
+            ('automatepro_gnss_heading_node/navpvt', '/sensor/gnss/heading/navpvt'),
             ('monhw', '/sensor/gnss/heading/monhw'),
             ('monsys', '/sensor/gnss/heading/monsys'),
             ('navrelposned', '/sensor/gnss/heading/navrelposned'),
@@ -161,7 +161,7 @@ def generate_cam2_node(config_dir_path):
 def generate_ntrip_client_node(config_dir_path):
     params = get_config_path(config_dir_path ,'automatepro_spartn_client', 'spartn_params.yaml')
     node = Node(
-        package='spartn_ros2_client',
+        package='spartn_client',
         executable='spartn_client',
         name='automatepro_spartn_client',
         output='screen',
