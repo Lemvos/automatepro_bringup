@@ -44,7 +44,7 @@ def get_config_path(config_dir_path, pkg_name, config_file):
     bringup_config = os.path.join(config_dir_path, config_file)
     
     if os.path.exists(bringup_config):
-        print(f'Param File: {os.path.join(bringup_config, config_file)}')
+        print(f'Param File: {bringup_config}')
         return bringup_config
 
     bringup_config_directory = os.path.join(
@@ -61,7 +61,7 @@ def get_config_path(config_dir_path, pkg_name, config_file):
         return os.path.join(package_config_directory, config_file)
 
 def generate_f9p_base_node(config_dir_path):
-    params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_base_params.yaml')
+    params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_position_params.yaml')
     node = launch_ros.actions.Node(
         name='automatepro_gnss_position_node',
         package='ublox_gps',
@@ -81,7 +81,7 @@ def generate_f9p_base_node(config_dir_path):
     return node
 
 def generate_f9h_rover_node(config_dir_path):
-    params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_rover_params.yaml')
+    params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_heading_params.yaml')
     node = launch_ros.actions.Node(
         name='automatepro_gnss_heading_node',
         package='ublox_gps',
