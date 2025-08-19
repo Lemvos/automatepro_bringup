@@ -10,8 +10,12 @@ from launch_ros.actions import Node, ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 
 
-enable_gnss = DeclareLaunchArgument(
-    "enable_gnss", default_value=TextSubstitution(text="true")
+enable_gnss_position = DeclareLaunchArgument(
+    "enable_gnss_position", default_value=TextSubstitution(text="true")
+)
+
+enable_gnss_heading = DeclareLaunchArgument(
+    "enable_gnss_heading", default_value=TextSubstitution(text="true")
 )
 
 enable_imu = DeclareLaunchArgument(
@@ -28,6 +32,10 @@ enable_camera = DeclareLaunchArgument(
 
 enable_ntrip_client = DeclareLaunchArgument(
     "enable_ntrip_client", default_value=TextSubstitution(text="true")
+)
+
+enable_spartn_client = DeclareLaunchArgument(
+    "enable_spartn_client", default_value=TextSubstitution(text="true")
 )
 
 config_dir = DeclareLaunchArgument(
@@ -159,6 +167,21 @@ def generate_cam2_node(config_dir_path):
     return node
 
 def generate_ntrip_client_node(config_dir_path):
+    params = get_config_path(config_dir_path ,'automatepro_ntrip_client', 'ntrip_params.yaml')
+    node = Node(
+        package='ntrip_client',
+        executable='ntrip_client',
+        name='automatepro_ntrip_client',
+        output='screen',
+            parameters=[params],
+            remappings=[
+                ('rtcm', '/sensor/gnss/correction'),
+            ],
+        )
+
+    return node
+
+def generate_spartn_client_node(config_dir_path):
     params = get_config_path(config_dir_path ,'automatepro_spartn_client', 'spartn_params.yaml')
     node = Node(
         package='spartn_client',
@@ -177,22 +200,27 @@ def generate_ntrip_client_node(config_dir_path):
 def configure_nodes(context, *args, **kwargs):
     nodes = []
 
-    enable_gnss_value = LaunchConfiguration('enable_gnss').perform(context)
+    enable_gnss_position_value = LaunchConfiguration('enable_gnss_position').perform(context)
+    enable_gnss_heading_value = LaunchConfiguration('enable_gnss_heading').perform(context)
     enable_imu_value = LaunchConfiguration('enable_imu').perform(context)
     enable_cam1_value = LaunchConfiguration('enable_cam1').perform(context)
     enable_cam2_value = LaunchConfiguration('enable_cam2').perform(context)
     enable_ntrip_client_value = LaunchConfiguration('enable_ntrip_client').perform(context)
+    enable_spartn_client_value = LaunchConfiguration('enable_spartn_client').perform(context)
     config_dir_value = LaunchConfiguration('config_dir').perform(context)
 
-    print("enable_gnss: ", enable_gnss_value)
+    print("enable_gnss_position: ", enable_gnss_position_value)
+    print("enable_gnss_heading: ", enable_gnss_heading_value)
     print("enable_imu: ", enable_imu_value)
     print("enable_cam1: ", enable_cam1_value)
     print("enable_cam2: ", enable_cam2_value)
     print("enable_ntrip_client: ", enable_ntrip_client_value)
+    print("enable_spartn_client: ", enable_spartn_client_value)
 
-    if enable_gnss_value == "true":
-        nodes.append(generate_f9h_rover_node(config_dir_value))
+    if enable_gnss_position_value == "true":
         nodes.append(generate_f9p_base_node(config_dir_value))
+    if enable_gnss_heading_value == "true":
+        nodes.append(generate_f9h_rover_node(config_dir_value))   
     if enable_imu_value == "true":
         nodes.append(generate_imu_driver_node(config_dir_value))
     if enable_cam1_value == "true":
@@ -201,15 +229,19 @@ def configure_nodes(context, *args, **kwargs):
         nodes.append(generate_cam2_node(config_dir_value))
     if enable_ntrip_client_value == "true":
         nodes.append(generate_ntrip_client_node(config_dir_value))
+    if enable_spartn_client_value == "true":
+        nodes.append(generate_spartn_client_node(config_dir_value))
 
     return nodes
 
 def generate_launch_description():
     return LaunchDescription([
-        enable_gnss,
+        enable_gnss_position,
+        enable_gnss_heading,
         enable_imu,
         enable_camera,
         enable_ntrip_client,
+        enable_spartn_client,
         config_dir,
         OpaqueFunction(function=configure_nodes),
     ])
