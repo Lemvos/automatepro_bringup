@@ -10,6 +10,7 @@ This package is used to bring up the ROS 2 nodes of the AutomatePro.
 - `enable_cam2` (bool, default: `true`): Enable Camera 2 node.
 - `enable_ntrip_client` (bool, default: `true`): Enable NTRIP client node.
 - `enable_spartn_client` (bool, default: `true`): Enable SPARTN client node.
+- `enable_driver_manager` (bool, default: `true`): Enable Driver Manager node.
 - `config_dir` (str, default: `""`): Optional path to a configuration directory to override default config files.
 
 ## Usage
@@ -22,5 +23,6 @@ ros2 launch automatepro_bringup core_driver.launch.py \
 	enable_cam2:=true \
 	enable_ntrip_client:=true \
 	enable_spartn_client:=true \
+	enable_driver_manager:=true \
 	config_dir:="/path/to/config/dir"
 ```
