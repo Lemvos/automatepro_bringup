@@ -175,11 +175,11 @@ def generate_ntrip_client_node(config_dir_path):
         executable='ntrip_client',
         name='automatepro_ntrip_client',
         output='screen',
-            parameters=[params],
-            remappings=[
-                ('rtcm', '/sensor/gnss/correction'),
-            ],
-        )
+        parameters=[params],
+        remappings=[
+            ('rtcm', '/sensor/gnss/correction'),
+        ],
+    )
 
     return node
 
@@ -190,12 +190,12 @@ def generate_spartn_client_node(config_dir_path):
         executable='spartn_client',
         name='automatepro_spartn_client',
         output='screen',
-            parameters=[params],
-            remappings=[
-                ('spartn', '/sensor/gnss/correction'),
-                ('nmea', '/sensor/gnss/position/nmea'),
-            ],
-        )
+        parameters=[params],
+        remappings=[
+            ('spartn', '/sensor/gnss/correction'),
+            ('nmea', '/sensor/gnss/position/nmea'),
+        ],
+    )
 
     return node
 
