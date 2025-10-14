@@ -2,9 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>automatepro_bringup</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <description>Bringup package for AutomatePro</description>
-  <maintainer email="balachandra.bhat@lemvos.com">Balachandra</maintainer>
+  <maintainer email="simone.contorno@lemvos.com">Simone Contorno</maintainer>
   <license>Apache-2.0</license>
 
   <depend>ament_cmake</depend>

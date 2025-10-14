@@ -1,13 +1,11 @@
 import os
 import ament_index_python.packages
-import launch
 import yaml
 import launch_ros.actions
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
-from launch.substitutions import LaunchConfiguration,  EnvironmentVariable, TextSubstitution
-from launch_ros.actions import Node, ComposableNodeContainer
-from launch_ros.descriptions import ComposableNode
+from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch_ros.actions import Node
 
 
 enable_gnss_position = DeclareLaunchArgument(
@@ -22,11 +20,11 @@ enable_imu = DeclareLaunchArgument(
     "enable_imu", default_value=TextSubstitution(text="true")
 )
 
-enable_camera = DeclareLaunchArgument(
+enable_cam1 = DeclareLaunchArgument(
     "enable_cam1", default_value=TextSubstitution(text="true")
 )
 
-enable_camera = DeclareLaunchArgument(
+enable_cam2 = DeclareLaunchArgument(
     "enable_cam2", default_value=TextSubstitution(text="true")
 )
 
@@ -36,6 +34,10 @@ enable_ntrip_client = DeclareLaunchArgument(
 
 enable_spartn_client = DeclareLaunchArgument(
     "enable_spartn_client", default_value=TextSubstitution(text="true")
+)
+
+enable_driver_manager = DeclareLaunchArgument(
+    "enable_driver_manager", default_value=TextSubstitution(text="true")
 )
 
 config_dir = DeclareLaunchArgument(
@@ -173,11 +175,11 @@ def generate_ntrip_client_node(config_dir_path):
         executable='ntrip_client',
         name='automatepro_ntrip_client',
         output='screen',
-            parameters=[params],
-            remappings=[
-                ('rtcm', '/sensor/gnss/correction'),
-            ],
-        )
+        parameters=[params],
+        remappings=[
+            ('rtcm', '/sensor/gnss/correction'),
+        ],
+    )
 
     return node
 
@@ -188,12 +190,24 @@ def generate_spartn_client_node(config_dir_path):
         executable='spartn_client',
         name='automatepro_spartn_client',
         output='screen',
-            parameters=[params],
-            remappings=[
-                ('spartn', '/sensor/gnss/correction'),
-                ('nmea', '/sensor/gnss/position/nmea'),
-            ],
-        )
+        parameters=[params],
+        remappings=[
+            ('spartn', '/sensor/gnss/correction'),
+            ('nmea', '/sensor/gnss/position/nmea'),
+        ],
+    )
+
+    return node
+
+def generate_driver_manager_node(config_dir_path):
+    params = get_config_path(config_dir_path, 'automatepro_driver_manager', 'driver_manager_params.yaml')
+    node = Node(
+        package='automatepro_driver_manager',
+        executable='driver_manager',
+        name='automatepro_driver_manager',
+        output='screen',
+        parameters=[params]
+    )
 
     return node
 
@@ -207,6 +221,7 @@ def configure_nodes(context, *args, **kwargs):
     enable_cam2_value = LaunchConfiguration('enable_cam2').perform(context)
     enable_ntrip_client_value = LaunchConfiguration('enable_ntrip_client').perform(context)
     enable_spartn_client_value = LaunchConfiguration('enable_spartn_client').perform(context)
+    enable_driver_manager_value = LaunchConfiguration('enable_driver_manager').perform(context)
     config_dir_value = LaunchConfiguration('config_dir').perform(context)
 
     print("enable_gnss_position: ", enable_gnss_position_value)
@@ -216,6 +231,7 @@ def configure_nodes(context, *args, **kwargs):
     print("enable_cam2: ", enable_cam2_value)
     print("enable_ntrip_client: ", enable_ntrip_client_value)
     print("enable_spartn_client: ", enable_spartn_client_value)
+    print("enable_driver_manager: ", enable_driver_manager_value)
 
     if enable_gnss_position_value == "true":
         nodes.append(generate_f9p_base_node(config_dir_value))
@@ -231,6 +247,8 @@ def configure_nodes(context, *args, **kwargs):
         nodes.append(generate_ntrip_client_node(config_dir_value))
     if enable_spartn_client_value == "true":
         nodes.append(generate_spartn_client_node(config_dir_value))
+    if enable_driver_manager_value == "true":
+        nodes.append(generate_driver_manager_node(config_dir_value))
 
     return nodes
 
@@ -239,9 +257,11 @@ def generate_launch_description():
         enable_gnss_position,
         enable_gnss_heading,
         enable_imu,
-        enable_camera,
+        enable_cam1,
+        enable_cam2,
         enable_ntrip_client,
         enable_spartn_client,
+        enable_driver_manager,
         config_dir,
         OpaqueFunction(function=configure_nodes),
     ])
