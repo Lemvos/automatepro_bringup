@@ -203,7 +203,7 @@ def generate_driver_manager_node(config_dir_path):
     params = get_config_path(config_dir_path, 'automatepro_driver_manager', 'driver_manager_params.yaml')
     node = Node(
         package='automatepro_driver_manager',
-        executable='driver_manager',
+        executable='automatepro_driver_manager_node',
         name='automatepro_driver_manager',
         output='screen',
         parameters=[params]
