@@ -1,4 +1,6 @@
 # AutomatePro Bringup
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FLemvos%2Fautomatepro_bringup.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FLemvos%2Fautomatepro_bringup?ref=badge_shield)
+
 
 This package is used to bring up the ROS 2 nodes of the AutomatePro.
 
@@ -26,3 +28,7 @@ ros2 launch automatepro_bringup core_driver.launch.py \
 	enable_driver_manager:=true \
 	config_dir:="/path/to/config/dir"
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FLemvos%2Fautomatepro_bringup.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FLemvos%2Fautomatepro_bringup?ref=badge_large)
