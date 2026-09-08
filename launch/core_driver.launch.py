@@ -70,6 +70,21 @@ def get_config_path(config_dir_path, pkg_name, config_file):
             'config')
         return os.path.join(package_config_directory, config_file)
 
+
+def get_camera_log_level(params, node_name):
+    """
+    Read logging.level for one camera out of the parameter file.
+
+    The camera driver does not declare logging.level as a ROS parameter, so it only
+    takes effect as --log-level on the command line. Scoping it to the node's own
+    logger keeps the RMW and DDS loggers at their defaults.
+    """
+    with open(params, 'r') as file:
+        data = yaml.safe_load(file)
+
+    return data.get(node_name, {}).get(
+        'ros__parameters', {}).get('logging', {}).get('level', 'info')
+
 def generate_f9p_base_node(config_dir_path):
     params = get_config_path(config_dir_path, 'ublox_gps', 'gnss_position_params.yaml')
     node = launch_ros.actions.Node(
@@ -124,46 +139,28 @@ def generate_imu_driver_node(config_dir_path):
 
 def generate_cam1_node(config_dir_path):
     params = get_config_path(config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml')
-    with open(params, 'r') as file:
-        data = yaml.safe_load(file)
-        camera_name = data.get(
-            'automatepro_cam1_node', {}).get(
-            'ros__parameters', {}).get('camera_name', 'cam1')
+    log_level = get_camera_log_level(params, 'automatepro_cam1_node')
     node = Node(
         package='automatepro_camera_driver',
         executable='camera_driver',
         output='both',
         name='automatepro_cam1_node',
         parameters=[params],
-        remappings=[
-            ('/camera/image_raw', f'/camera/{camera_name}/image_raw'),
-            ('/camera/camera_info', f'/camera/{camera_name}/camera_info'),
-            ('/camera/h264/video', f'/camera/{camera_name}/h264/video'),
-            ('/camera/h264/calib', f'/camera/{camera_name}/h264/calib'),
-        ]
+        arguments=['--ros-args', '--log-level', f'automatepro_cam1_node:={log_level}'],
     )
 
     return node
 
 def generate_cam2_node(config_dir_path):
     params = get_config_path(config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml')
-    with open(params, 'r') as file:
-        data = yaml.safe_load(file)
-        camera_name = data.get(
-            'automatepro_cam2_node', {}).get(
-            'ros__parameters', {}).get('camera_name', 'cam2')
-    node = Node( 
+    log_level = get_camera_log_level(params, 'automatepro_cam2_node')
+    node = Node(
         package='automatepro_camera_driver',
         executable='camera_driver',
         output='both',
         name='automatepro_cam2_node',
         parameters=[params],
-        remappings=[
-            ('/camera/image_raw', f'/camera/{camera_name}/image_raw'),
-            ('/camera/camera_info', f'/camera/{camera_name}/camera_info'),
-            ('/camera/h264/video', f'/camera/{camera_name}/h264/video'),
-            ('/camera/h264/calib', f'/camera/{camera_name}/h264/calib'),
-        ]
+        arguments=['--ros-args', '--log-level', f'automatepro_cam2_node:={log_level}'],
     )
 
     return node

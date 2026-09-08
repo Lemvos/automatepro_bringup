@@ -1,45 +1,83 @@
 automatepro_cam1_node:
   ros__parameters:
     camera_name: "cam1"
-    camera_info_url: ""
     resolution: [640, 512]
-    format: "bgr8"
     frame_id: "cam1"
 
     compression:
       enable: true
-      format: "h264"
-      bitrate: 5000    # kbps
+      bitrate_kbps: 5000
     rtp:
       enable: false
+
+    # Not a declared ROS parameter: the launch file reads it here and turns it into
+    # --log-level automatepro_cam1_node:=<level> so it scopes to this node.
+    logging:
+      level: "info"
+
+    watchdog:
+      timeout_ms: 2000
+      cycle_time_ms: 500
+
+    recovery:
+      gmsl2_restart_wait_s: 10
+      gmsl2_escalation_threshold: 1
+      window_s: 60
+      max_total_attempts: 3
+      retry_delay_s: 5
 
     # Do not change the following parameters
     sensor:
       device: "/dev/video0"
-      model: "SG3S-ISX031C"
       resolution: [1920, 1536]
-      frame_rate: 30
+      frame_rate_fps: 30
       format: "UYVY"
+      # Refuse to configure unless this camera's GMSL2 serializer answers on the link.
+      presence_check:
+        enable: true
+        i2c_bus: "/dev/i2c-9"
+        serializer_address: 96    # 0x60, the MAX9295 in this camera head
+        timeout_ms: 2000
 
 automatepro_cam2_node:
   ros__parameters:
     camera_name: "cam2"
-    camera_info_url: ""
     resolution: [640, 512]
-    format: "bgr8"
     frame_id: "cam2"
 
     compression:
       enable: true
-      format: "h264"
-      bitrate: 5000    # kbps
+      bitrate_kbps: 5000
     rtp:
       enable: false
+
+    # Not a declared ROS parameter: the launch file reads it here and turns it into
+    # --log-level automatepro_cam2_node:=<level> so it scopes to this node.
+    logging:
+      level: "info"
+
+    watchdog:
+      timeout_ms: 2000
+      cycle_time_ms: 500
+
+    recovery:
+      gmsl2_restart_wait_s: 10
+      gmsl2_escalation_threshold: 1
+      window_s: 60
+      max_total_attempts: 3
+      # Staggered against cam1: both nodes share one VI capture path, and recovering
+      # in lockstep is what trips the multi-camera race in the kernel driver.
+      retry_delay_s: 7
 
     # Do not change the following parameters
     sensor:
       device: "/dev/video1"
-      model: "SG3S-ISX031C"
       resolution: [1920, 1536]
-      frame_rate: 30
+      frame_rate_fps: 30
       format: "UYVY"
+      # Refuse to configure unless this camera's GMSL2 serializer answers on the link.
+      presence_check:
+        enable: true
+        i2c_bus: "/dev/i2c-9"
+        serializer_address: 98    # 0x62, the MAX9295 in this camera head
+        timeout_ms: 2000
