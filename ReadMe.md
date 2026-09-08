@@ -13,6 +13,10 @@ This package is used to bring up the ROS 2 nodes of the AutomatePro.
 - `enable_driver_manager` (bool, default: `true`): Enable Driver Manager node.
 - `config_dir` (str, default: `""`): Optional path to a configuration directory to override default config files.
 
+## Prerequisites
+
+`enable_ntrip_client:=true` starts `automatepro_ntrip_client` through its own launch file, which reads the caster credentials from the environment rather than from `ntrip_params.yaml`. Export `NTRIP_USERNAME` and `NTRIP_PASSWORD` before launching, or the launch aborts.
+
 ## Usage
 ```bash
 ros2 launch automatepro_bringup core_driver.launch.py \
