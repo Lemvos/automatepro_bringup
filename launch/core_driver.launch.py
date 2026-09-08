@@ -3,9 +3,15 @@ import ament_index_python.packages
 import yaml
 import launch_ros.actions
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    OpaqueFunction,
+)
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, TextSubstitution
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetRemap
 
 
 enable_gnss_position = DeclareLaunchArgument(
@@ -165,20 +171,26 @@ def generate_cam2_node(config_dir_path):
 
     return node
 
-def generate_ntrip_client_node(config_dir_path):
+def generate_ntrip_client_launch(config_dir_path):
     params = get_config_path(config_dir_path ,'automatepro_ntrip_client', 'ntrip_params.yaml')
-    node = Node(
-        package='ntrip_client',
-        executable='ntrip_client',
-        name='automatepro_ntrip_client',
-        output='screen',
-        parameters=[params],
-        remappings=[
-            ('rtcm', '/sensor/gnss/correction'),
-        ],
-    )
+    launch_file = os.path.join(
+        ament_index_python.packages.get_package_share_directory('automatepro_ntrip_client'),
+        'launch',
+        'automatepro_ntrip_client.launch.py')
 
-    return node
+    # The client publishes on an absolute /rtcm and its launch file exposes no
+    # remapping argument, so the rule is set on the context instead. SetRemap
+    # reaches the composable node through LoadComposableNodes, which a remapping
+    # passed to IncludeLaunchDescription would not.
+    group = GroupAction([
+        SetRemap('/rtcm', '/sensor/gnss/correction'),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_file),
+            launch_arguments={'params_file': params}.items(),
+        ),
+    ], scoped=True)
+
+    return group
 
 def generate_spartn_client_node(config_dir_path):
     params = get_config_path(config_dir_path ,'automatepro_spartn_client', 'spartn_params.yaml')
@@ -241,7 +253,7 @@ def configure_nodes(context, *args, **kwargs):
     if enable_cam2_value == "true":
         nodes.append(generate_cam2_node(config_dir_value))
     if enable_ntrip_client_value == "true":
-        nodes.append(generate_ntrip_client_node(config_dir_value))
+        nodes.append(generate_ntrip_client_launch(config_dir_value))
     if enable_spartn_client_value == "true":
         nodes.append(generate_spartn_client_node(config_dir_value))
     if enable_driver_manager_value == "true":
