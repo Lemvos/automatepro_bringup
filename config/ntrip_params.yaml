@@ -1,8 +1,25 @@
+# NTRIP client parameters for SAPOS Bayern VRS corrections.
+#
+# Credentials are intentionally NOT stored here. The node reads NTRIP_USERNAME
+# and NTRIP_PASSWORD from its own environment; supply them to the core driver
+# container through the env_file in docker-compose-core.yaml. A parameter would
+# be readable with "ros2 param get" by any process on the graph.
 automatepro_ntrip_client:
   ros__parameters:
-    use_https: false
-    host: rtk2go.com
+    use_https: false            # SAPOS Bayern serves plain NTRIP on TCP/2101.
+    host: sapos-rtk.bayern.de
     port: 2101
-    mountpoint: Prittlbach
-    username: "noname"
-    password: "password"
+    # VRS mountpoints: VRS_3_2G_BY (GPS+GLONASS), VRS_3_3G_BY (+Galileo),
+    # VRS_3_4G_BY (GPS+GLONASS+Galileo+BeiDou).
+    mountpoint: VRS_3_4G_BY
+    # A VRS caster serves nothing until the client reports its position. This is
+    # where core_driver.launch.py remaps the F9P node's fix output.
+    fix_topic: /sensor/gnss/position/fix
+    # Records published before the transfer is aborted so the streaming loop can
+    # refresh the GGA position and observe a shutdown request.
+    records_per_connection: 10
+    # Delay after a failed connection attempt.
+    reconnect_backoff_s: 1.0
+    # Not a declared ROS parameter: the client's launch file reads it here and
+    # turns it into --log-level automatepro_ntrip_client:=<level>.
+    log_level: info
