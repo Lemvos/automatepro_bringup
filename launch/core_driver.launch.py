@@ -51,14 +51,20 @@ config_dir = DeclareLaunchArgument(
 )
 
 
-"""
-If the config file exists in the config dir of the bringup package, load that.
-else load the config file located in each package.
-"""
-def get_config_path(config_dir_path, pkg_name, config_file):
+def get_config_path(config_dir_path, pkg_name, config_file, pkg_config_file=None):
+    """
+    Resolve the parameter file of one node.
 
+    The file in config_dir_path wins, then the one in the automatepro_bringup share
+    config directory, then the one in the config directory of pkg_name. pkg_config_file
+    names the file on that last step, for a package whose own copy is named differently
+    from the copy seeded in config_dir_path, and defaults to config_file.
+
+    Raises FileNotFoundError naming pkg_name and the path looked for, so a missing file
+    fails here rather than inside rcl as a YAML parse error.
+    """
     bringup_config = os.path.join(config_dir_path, config_file)
-    
+
     if os.path.exists(bringup_config):
         print(f'Param File: {bringup_config}')
         return bringup_config
@@ -67,14 +73,21 @@ def get_config_path(config_dir_path, pkg_name, config_file):
         ament_index_python.packages.get_package_share_directory('automatepro_bringup'),
         'config')
     bringup_config = os.path.join(bringup_config_directory, config_file)
-    
+
     if os.path.exists(bringup_config):
         return bringup_config
-    else:
-        package_config_directory = os.path.join(
-            ament_index_python.packages.get_package_share_directory(pkg_name),
-            'config')
-        return os.path.join(package_config_directory, config_file)
+
+    package_config_directory = os.path.join(
+        ament_index_python.packages.get_package_share_directory(pkg_name),
+        'config')
+    package_config = os.path.join(
+        package_config_directory, pkg_config_file or config_file)
+
+    if not os.path.exists(package_config):
+        raise FileNotFoundError(
+            f'{pkg_name} ships no parameter file at {package_config}')
+
+    return package_config
 
 
 def get_camera_log_level(params, node_name):
@@ -144,7 +157,9 @@ def generate_imu_driver_node(config_dir_path):
     return node
 
 def generate_cam1_node(config_dir_path):
-    params = get_config_path(config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml')
+    params = get_config_path(
+        config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml',
+        'config.yaml')
     log_level = get_camera_log_level(params, 'automatepro_cam1_node')
     node = Node(
         package='automatepro_camera_driver',
@@ -158,7 +173,9 @@ def generate_cam1_node(config_dir_path):
     return node
 
 def generate_cam2_node(config_dir_path):
-    params = get_config_path(config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml')
+    params = get_config_path(
+        config_dir_path, 'automatepro_camera_driver', 'camera_params.yaml',
+        'config.yaml')
     log_level = get_camera_log_level(params, 'automatepro_cam2_node')
     node = Node(
         package='automatepro_camera_driver',
@@ -172,7 +189,9 @@ def generate_cam2_node(config_dir_path):
     return node
 
 def generate_ntrip_client_launch(config_dir_path):
-    params = get_config_path(config_dir_path ,'automatepro_ntrip_client', 'ntrip_params.yaml')
+    params = get_config_path(
+        config_dir_path, 'automatepro_ntrip_client', 'ntrip_params.yaml',
+        'params.yaml')
     launch_file = os.path.join(
         ament_index_python.packages.get_package_share_directory('automatepro_ntrip_client'),
         'launch',
@@ -193,7 +212,7 @@ def generate_ntrip_client_launch(config_dir_path):
     return group
 
 def generate_spartn_client_node(config_dir_path):
-    params = get_config_path(config_dir_path ,'automatepro_spartn_client', 'spartn_params.yaml')
+    params = get_config_path(config_dir_path, 'spartn_client', 'spartn_params.yaml')
     node = Node(
         package='spartn_client',
         executable='spartn_client',
@@ -209,7 +228,9 @@ def generate_spartn_client_node(config_dir_path):
     return node
 
 def generate_driver_manager_node(config_dir_path):
-    params = get_config_path(config_dir_path, 'automatepro_driver_manager', 'driver_manager_params.yaml')
+    params = get_config_path(
+        config_dir_path, 'automatepro_driver_manager', 'driver_manager_params.yaml',
+        'driver_manager.yaml')
     node = Node(
         package='automatepro_driver_manager',
         executable='automatepro_driver_manager_node',
