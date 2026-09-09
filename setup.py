@@ -6,19 +6,18 @@ package_name = 'automatepro_bringup'
 
 setup(
     name=package_name,
-    version='1.1.0',
+    version='1.2.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Simone Contorno',
-    maintainer_email='simone.contorno@lemvos.com',
+    maintainer='Lemvos Robotics GmbH',
+    maintainer_email='engineering@lemvos.com',
     description='Bringup package for AutomatePro',
     license='Apache-2.0',
     tests_require=['pytest'],
