@@ -13,6 +13,19 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, TextSubstitution
 from launch_ros.actions import Node, SetRemap
 
+# Seconds between a node exiting and launch starting it again.
+#
+# The camera driver refuses to configure when no GMSL2 serializer answers, and exits.
+# Respawning is what lets a camera attached after boot come up without an operator
+# restarting the stack. The delay is sized against someone attaching a camera, not
+# against the refusal itself, which takes about two seconds: a shorter delay only
+# repeats that refusal in the journal.
+CAMERA_RESPAWN_DELAY_S = 30.0
+
+# The driver manager needs nothing external to change before it can start, and while it
+# is down the camera drivers have no GMSL2 recovery, so it comes back promptly.
+DRIVER_MANAGER_RESPAWN_DELAY_S = 10.0
+
 
 enable_gnss_position = DeclareLaunchArgument(
     "enable_gnss_position", default_value=TextSubstitution(text="true")
@@ -168,6 +181,8 @@ def generate_cam1_node(config_dir_path):
         name='automatepro_cam1_node',
         parameters=[params],
         arguments=['--ros-args', '--log-level', f'automatepro_cam1_node:={log_level}'],
+        respawn=True,
+        respawn_delay=CAMERA_RESPAWN_DELAY_S,
     )
 
     return node
@@ -184,6 +199,8 @@ def generate_cam2_node(config_dir_path):
         name='automatepro_cam2_node',
         parameters=[params],
         arguments=['--ros-args', '--log-level', f'automatepro_cam2_node:={log_level}'],
+        respawn=True,
+        respawn_delay=CAMERA_RESPAWN_DELAY_S,
     )
 
     return node
@@ -236,7 +253,9 @@ def generate_driver_manager_node(config_dir_path):
         executable='automatepro_driver_manager_node',
         name='automatepro_driver_manager',
         output='screen',
-        parameters=[params]
+        parameters=[params],
+        respawn=True,
+        respawn_delay=DRIVER_MANAGER_RESPAWN_DELAY_S,
     )
 
     return node

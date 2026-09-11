@@ -22,6 +22,19 @@ This package installs no configuration of its own.
 Without `config_dir`, each node falls back to the parameter file its own package installs under `share/<package>/config`, which is the developer path.
 Where a package installs that file under a different name from the one the `.deb` seeds, the launch file names both, so the fallback resolves for every node.
 
+## Node restart
+
+The camera nodes and the driver manager are launched with `respawn`, so launch starts them again when their process exits.
+Nothing else in this launch file respawns.
+
+`automatepro_cam1_node` and `automatepro_cam2_node` restart 30 seconds after exiting.
+The camera driver refuses to configure and exits when no GMSL2 serializer answers on the i2c bus, so a camera attached after boot would otherwise need an operator to restart the whole stack.
+With no camera attached the node exits on every attempt, and repeated start-and-exit cycles in the journal are expected rather than a fault.
+
+`automatepro_driver_manager` restarts 10 seconds after exiting, sooner because nothing external has to change before it can start, and because the camera drivers have no GMSL2 recovery while it is down.
+
+Restarts are suppressed once shutdown begins, so a stopping stack is never held open by a node coming back.
+
 ## Prerequisites
 
 `enable_ntrip_client:=true` starts `automatepro_ntrip_client` through its own launch file, which reads the caster credentials from the environment rather than from `ntrip_params.yaml`. Export `NTRIP_USERNAME` and `NTRIP_PASSWORD` before launching, or the launch aborts.
